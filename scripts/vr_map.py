@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - Stage 1 (MAP) deterministic core.
+kernel_vr_skills - Stage 1 (MAP) deterministic core.
 
 Pipeline (no LLM here; the LLM steps PROFILE and SCOPE-PROPOSE live in the skill):
 

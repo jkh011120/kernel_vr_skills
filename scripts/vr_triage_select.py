@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - Stage 2 (TRIAGE) deterministic gate.
+kernel_vr_skills - Stage 2 (TRIAGE) deterministic gate.
 
 TRIAGE judgement itself is done by LLM subagents (see .claude/skills/vr-triage/SKILL.md),
 which write per-candidate verdicts to out/triage.json. This script applies the *selection

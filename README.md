@@ -1,4 +1,4 @@
-# kernel_vs_skills
+# kernel_vr_skills
 
 Claude Code **skills for kernel Vulnerability Research (VR)** — a static analysis pipeline that
 finds memory-safety / privilege bugs in Linux kernel drivers by combining two complementary
@@ -47,7 +47,7 @@ These run through every stage:
 
 ```bash
 # 0. One-time setup (checks Python/git, installs tree-sitter + C grammar, self-checks):
-git clone <this-repo> && cd kernel_vs_skills
+git clone <this-repo> && cd kernel_vr_skills
 ./setup.sh
 
 # 1. Point it at a target once (cached to configs/vr-config.json afterward):

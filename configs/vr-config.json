@@ -1,5 +1,5 @@
 {
-  "_comment": "Project-level defaults for kernel_vs_skills. Edit target to point at the kernel source you analyze.",
+  "_comment": "Project-level defaults for kernel_vr_skills. Edit target to point at the kernel source you analyze.",
   "target": {
     "repo": "/path/to/linux-kernel",
     "scope": "drivers/gpu/arm/midgard",

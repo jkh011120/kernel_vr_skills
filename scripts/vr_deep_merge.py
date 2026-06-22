@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - Stage 3 (DEEP) deterministic merge.
+kernel_vr_skills - Stage 3 (DEEP) deterministic merge.
 
 The deep analysis and the adversarial verification are done by LLM subagents
 (see .claude/skills/vr-deep/SKILL.md). This script aggregates their output into a final

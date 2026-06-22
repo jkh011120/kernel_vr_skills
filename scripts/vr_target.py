@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - resolve + cache the analysis target.
+kernel_vr_skills - resolve + cache the analysis target.
 
 Resolution precedence: --repo/--scope args  >  configs/vr-config.json target.*  > (caller asks).
 When args are supplied, they are CACHED back into the config so the next run can omit them

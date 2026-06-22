@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - hypothesis TARGET scheduler (breadth/depth balance).
+kernel_vr_skills - hypothesis TARGET scheduler (breadth/depth balance).
 
 Turns open hypotheses into work, keeping EXPLORE (broad) and EXPLOIT (deep) in balance so the
 loop never collapses into one rabbit hole:

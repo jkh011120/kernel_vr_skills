@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - Stage 6 (REPORT).
+kernel_vr_skills - Stage 6 (REPORT).
 
 Deterministically render the final reports from out/classified.json (which already holds every
 structured field from DEEP+CLASSIFY). No LLM needed; this is reproducible markdown assembly.

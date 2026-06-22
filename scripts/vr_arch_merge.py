@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - living architecture model: delta merge + render.
+kernel_vr_skills - living architecture model: delta merge + render.
 
 The STUDY subagent (vr-arch) emits ONLY deltas (newly-learned / corrected knowledge) into
 out/arch_delta.json. This script integrates them into the canonical store out/arch_model.json

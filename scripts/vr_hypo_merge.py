@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - living hypothesis store: delta merge.
+kernel_vr_skills - living hypothesis store: delta merge.
 
 The HYPOTHESIZE subagent (vr-hypothesize) and the FEEDBACK step (after DEEP) emit deltas into
 out/hypo_delta.json; this integrates them into out/hypotheses.json (add / refine / status).

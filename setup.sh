@@ -1,5 +1,5 @@
 #!/bin/bash
-# kernel_vs_skills - setup
+# kernel_vr_skills - setup
 # No Python venv / pip deps (scripts use the stdlib only). The only real external dependency is
 # the tree-sitter CLI + C grammar (for symbol indexing & call graph); without it the scripts fall
 # back to regex (works, lower accuracy). Run from the repo root.
@@ -11,7 +11,7 @@ warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
 fail()    { echo -e "${RED}[ERROR]${NC} $1"; }
 
 echo "============================================"
-echo "  kernel_vs_skills - setup"
+echo "  kernel_vr_skills - setup"
 echo "============================================"
 
 cd "$(dirname "$0")" || exit 1

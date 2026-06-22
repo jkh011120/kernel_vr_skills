@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - Stage 5 (FOLLOWUP) deterministic queue builder + loop state.
+kernel_vr_skills - Stage 5 (FOLLOWUP) deterministic queue builder + loop state.
 
 Builds the next round's analysis queue by chasing follow-up symbols from unresolved findings
 and (optionally) draining the deferred triage queue. Maintains round + dedup state so the loop

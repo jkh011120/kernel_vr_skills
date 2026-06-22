@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kernel_vs_skills - Stage 4 (CLASSIFY) deterministic enforcement.
+kernel_vr_skills - Stage 4 (CLASSIFY) deterministic enforcement.
 
 The TP/FP/uncertain judgement + impact_class normalization is done by an LLM subagent
 (see .claude/skills/vr-classify/SKILL.md) into out/classifications.json. This script reconciles
