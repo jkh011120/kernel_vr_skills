@@ -22,17 +22,43 @@ user for the kernel path and the subsystem subdir (do not guess), then re-run wi
 
 Echo back the resolved `repo`, `scope`, mode, and options before starting.
 
-### Step 0b — Fresh run (prevent cross-target contamination)
+### Step 0b — Preserve by default; clear only on `--fresh` or a target change
 
-`out/` accumulates state (profile, candidates, findings, arch_model, followup_state, …). Running
-a NEW target over an old `out/` mixes results. So by default, start fresh:
+`out/` accumulates state (profile, candidates, findings, arch_model, followup_state, …) and prior
+results (report.md, architecture.md). **Default = preserve it (resume).** Do NOT delete `out/`
+unless one of these holds:
+
+1. `--fresh` is passed (explicit opt-in to start clean), OR
+2. the resolved target (`repo`+`scope`) DIFFERS from the cached/previous run — then you MUST clear
+   regardless, to prevent cross-target contamination.
 
 ```bash
-rm -f out/*.json out/*.md          # default: clear stale artifacts
+# ONLY when --fresh OR the target changed (NEVER on a default same-target re-run):
+rm -f out/*.json out/*.md          # clear stale artifacts
 ```
 
-Skip this if `--resume` is passed (continue a prior run of the SAME target). If the cached target
-differs from a previous run, always clear regardless.
+When preserving (the default), the pipeline continues the same target: stages with existing,
+non-empty handoffs are reused, and FOLLOWUP / HYPOTHESIS-LOOP pick up where they left off.
+If you are about to clear because the target changed, say so before doing it.
+If unsure whether the user wants to discard prior results, ASK before clearing — deletion of `out/`
+(including reports) is destructive and hard to reverse.
+
+### Step 0c — Auto-extend rounds on every resume (no no-op runs)
+
+On a same-target resume (the default), **automatically advance the loops by `--rounds` each
+invocation** so a bare `/vr-analyze` always makes new progress instead of being a no-op at the cap:
+
+```bash
+# read the last completed FOLLOWUP round (0 if absent), then extend the cap by --rounds
+LAST=$(python3 -c "import json,os; p='out/followup_state.json'; print(json.load(open(p)).get('round',0) if os.path.exists(p) else 0)")
+NEXT_CAP=$((LAST + ROUNDS))     # ROUNDS = --rounds value (default 2)
+```
+
+Then run FOLLOWUP and the HYPOTHESIS-LOOP with `--max-rounds $NEXT_CAP` (i.e. each invocation does
+`--rounds` MORE rounds than last time). This applies to both loops symmetrically. A run only ends as
+a true no-op if the newly-extended round genuinely yields an empty queue (no new followup symbols
+AND no open `concrete` hypotheses) — in that case say so plainly. On a `--fresh` run, the counters
+reset to 0 so the first cap is just `--rounds`.
 
 ## Options
 
@@ -46,8 +72,8 @@ hypothesis loop enabled.** Flags only REDUCE scope/effort.
 | `--no-followup` | off (followup ON) | skip the Stage 5 followup loop |
 | `--no-hypo-loop` | off (hypo-loop ON) | skip the top-down hypothesis loop |
 | `--quick` | off | bottom-up core only: MAP→TRIAGE→DEEP→CLASSIFY→REPORT (no followup, no hypo-loop) |
-| `--resume` | off | keep existing `out/` artifacts (continue same target); default starts fresh |
-| `--rounds N` | 2 | round cap for followup / hypo-loop |
+| `--fresh` | off | clear `out/` and start clean; **default PRESERVES `out/` (resume)**. A target change clears regardless. |
+| `--rounds N` | 2 | rounds to ADVANCE per invocation. On resume the cap auto-extends by N each run (Step 0c), so the loops never sit idle at the cap; on `--fresh` the first cap is just N. |
 
 ## Mode: auto (default) vs --interactive
 

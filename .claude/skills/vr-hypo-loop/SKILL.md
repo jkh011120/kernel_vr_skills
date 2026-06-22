@@ -33,6 +33,23 @@ Living stores (delta+merge, never rewritten): `out/arch_model.json` (→ `archit
    - For each finding that resolves a hypothesis, write a `status` op (confirmed / refuted /
      needs_info) into `hypo_delta.json` and run `vr_hypo_merge.py` (the merge keeps area/mechanism
      open even if a refute is attempted — no-safe-patterns).
+   - **`refuted` proves only that the hypothesis's *stated mechanism* is wrong — NOT that the
+     function/area is safe.** Before writing `refuted`, the finding must have gone through the full
+     Step 2 VERIFY 3-lens panel — for race / TOCTOU / check-then-act hypotheses a single deep note
+     must NOT flip it to refuted; use `needs_info` instead.
+   - On a `refuted` concrete hypothesis, `vr_hypo_merge.py` re-queues the touched `target_symbols`
+     into `explore_queue.json` for ONE fresh look under a different lens — but this is **bounded so
+     genuinely-safe code is not re-examined forever**: (a) ONE-SHOT — fires at most once per
+     hypothesis (`reexam_emitted` marker); (b) CLASS-GATED — only for failure-prone classes
+     (race / toctou / uaf / double_free / refcount), where refuting one mechanism can leave a
+     *different* bug; a cleanly-refuted value-bound finding (oob / int_overflow with a cited bound)
+     is treated as settled and is NOT re-queued. So #3 is a one-time safety net, not a perpetual
+     re-scan — the round cap and these bounds both keep the loop terminating.
+   - Rationale: this blocks the over-generalization "hypothesis refuted ⇒ code cleared" that hides
+     a real bug next to a wrong guess (observed: a page-migration race was missed because refuting
+     one mechanism closed the function, while the actual *skip-the-pages[]-update-but-return-success*
+     bug survived). With #1/#2 now in place the first panel usually catches it; #3 only covers the
+     residual miss, once.
    - For anything DEEP learned that contradicts/extends the model, write a `refine`/`add` into
      `arch_delta.json` and run `vr_arch_merge.py`. This is what makes the model self-correcting
      and progressively more detailed.

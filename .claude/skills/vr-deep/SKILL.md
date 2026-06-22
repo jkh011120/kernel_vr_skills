@@ -64,10 +64,42 @@ space, (c) does the claimed impact actually hold. Task:
 > blocks the path, an invariant that prevents the state, or a reason the path is unreachable
 > from user space. "It looks safe" is NOT a refutation. Default to refuted=false if you cannot
 > cite something concrete.
+>
+> HARD RULES (a refutation that violates any of these does NOT count — set refuted=false):
+> 1. CHECK ≠ GUARD. If you cite a re-check / re-validation / status re-read as protective, you
+>    MUST show that the relevant branch either (a) returns an error, (b) actually performs the
+>    required state update (cite the write), or (c) cancels the dangerous action. A branch that
+>    DETECTS a changed state but then SKIPS a required update while STILL RETURNING SUCCESS is
+>    the BUG, not a guard.
+> 2. ANTI-STRAWMAN. Do not refute by attacking a slightly-different mechanism than the finding's.
+>    If the finding's *exact* mechanism is wrong but the SAME window/state/object yields a
+>    different bad outcome, that is NOT a refutation — set refuted=false and say so.
+> 3. LOCK ALONE IS NOT A REFUTATION. "an isolation refcount / lock serializes it" only counts if
+>    you show that lock covers the EXACT object and timepoint the finding claims corruption for
+>    (a refcount protecting an object *during* an operation does NOT protect a stale pointer left
+>    *after* a success-return). Cite the line proving the coverage.
+> 4. DISTRUST COMMENTS. A code comment asserting safety ("state can no longer change here") is not
+>    evidence; verify it against the actual lock / state-transition code before relying on it.
 > Return ONLY: `name`, `refuted` (bool), `reason` (your cited evidence, or why you could not
 > refute), `missed_guard` (string, optional).
 
+For any finding whose `vuln_class` is a **race / TOCTOU / check-then-act** (or whose claim hinges
+on a dropped-then-reacquired lock), add this question to every lens: *"On the re-validation
+branch, is any required state update skipped while success is still returned? If so, what frees /
+reuses the object afterward?"* — and NEVER let such a finding be closed by a single verdict; the
+full 3-lens panel is mandatory (see Step 2b).
+
 Collect all verdicts (multiple per finding) into `out/verifications.json`.
+
+### Step 2b — Mandatory panel for race / TOCTOU findings (no single-verdict kill)
+
+A `refuted` verdict on a race / TOCTOU / check-then-act finding is only valid if the **full 3-lens
+panel ran** and a majority cited a rule-compliant refutation (per the HARD RULES above). Never
+flip such a finding to `refuted` from a single deep-analysis note. If only one verdict exists for
+such a finding, treat it as `uncertain` and re-queue it for the full panel. (This is the failure
+mode that produced a false-negative on a real page-migration race: a single note cited a
+re-validation as a "guard" when that branch actually skipped a required `pages[]` update and still
+returned success.)
 
 ## Step 3 — MERGE (deterministic status)
 
