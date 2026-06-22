@@ -1,0 +1,14 @@
+{
+  "_comment": "Project-level defaults for kernel_vs_skills. Edit target to point at the kernel source you analyze.",
+  "target": {
+    "repo": "/path/to/linux-kernel",
+    "scope": "drivers/gpu/arm/midgard",
+    "name": "unnamed-target"
+  },
+  "map": {
+    "max_candidates": 25,
+    "max_graph_depth": 3,
+    "enrich_max_body_lines": 400,
+    "min_enrich_score_factor": 0.5
+  }
+}

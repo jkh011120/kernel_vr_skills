@@ -1,0 +1,13 @@
+{
+  "_comment": "What the HYPOTHESIZE subagent (vr-hypothesize) emits, and what FEEDBACK writes after DEEP. vr_hypo_merge.py integrates into out/hypotheses.json. ALWAYS produce a MIX of levels — not only 'concrete'. 'area' = broad exploratory direction (keeps search wide, prevents tunnel vision); 'mechanism' = a design mechanism to scrutinize; 'concrete' = a specific, DEEP-testable claim. no-safe-patterns rule: area/mechanism hypotheses can NEVER be refuted/closed as safe (the merge enforces this — a refute on them is downgraded to 'open'); only 'concrete' hypotheses can be confirmed/refuted.",
+
+  "hypotheses": [
+    {"op": "add", "level": "area", "area": "object lifetime in CSF", "from_optimization": null, "bug_class": "uaf", "why": "queue lifetime spans ioctl + mmap + IRQ paths — complex ownership", "target_symbols": []},
+    {"op": "add", "level": "mechanism", "area": "lockless ring buffer", "from_optimization": "o1", "bug_class": "race", "why": "head/tail updated without lock on fast path", "target_symbols": ["kbase_csf_enqueue"]},
+    {"op": "add", "level": "concrete", "area": "lockless ring buffer", "from_optimization": "o1", "bug_class": "oob_write", "why": "tail index not re-validated against ring size before write at suspected L120", "target_symbols": ["kbase_csf_enqueue"], "parent": null},
+
+    {"op": "refine", "id": "h3", "note": "narrowed to the wrap-around case", "why": "tail wraps but write uses stale tail copy"},
+    {"op": "status", "id": "h3", "status": "refuted", "note": "DEEP found re-validation at L122 (cited) — this specific claim disproven"},
+    {"op": "status", "id": "h1", "status": "refuted", "note": "tried to close the AREA — merge will KEEP it open per no-safe-patterns"}
+  ]
+}

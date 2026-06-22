@@ -1,0 +1,18 @@
+{
+  "_comment": "What the STUDY subagent (vr-arch) emits each round: ONLY what it newly learned or needs to correct — never the whole model. vr_arch_merge.py integrates this into out/arch_model.json (add/refine/retract) and re-renders out/architecture.md. Use op='add' for new knowledge, op='refine' to correct/deepen an existing entry by id (e.g. analysis proved an earlier note wrong), op='retract' to withdraw an entry shown false, op='answer' to close an open_question. Corrections are recorded in each entry's history (never silently overwritten).",
+
+  "components": [
+    {"op": "add", "name": "CSF command queue", "role": "user-submitted GPU command ring", "files": ["mali_kbase_csf.c"], "key_structs": ["kbase_queue", "kbase_queue_group"], "lifecycle": "create via ioctl -> bind -> mmap doorbell -> destroy", "locking": "csf.lock mutex", "notes": "", "confidence": 0.4},
+    {"op": "refine", "id": "c1", "note": "analysis found bounds check at L88; earlier 'no validation' was wrong", "locking": "csf.lock + per-queue spinlock"}
+  ],
+
+  "optimizations": [
+    {"op": "add", "name": "lockless ring buffer", "technique": "producer/consumer head/tail indices, no lock on fast path", "where": ["kbase_csf_enqueue", "mali_kbase_csf.c"], "safety_traded": "skips locking for throughput", "risk_notes": "head/tail must be validated against ring size on each use", "confidence": 0.4},
+    {"op": "retract", "id": "o2", "note": "no custom allocator after all — uses standard kmalloc"}
+  ],
+
+  "open_questions": [
+    {"op": "add", "question": "Is the doorbell page user-mapped while the queue can be freed?", "about": "c1"},
+    {"op": "answer", "id": "q1", "status": "answered", "note": "yes, mmap'd in kbase_csf_mmap; lifetime tied to ctx"}
+  ]
+}
