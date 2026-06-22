@@ -114,7 +114,9 @@ nothing, say so plainly (do not silently continue as if it succeeded).
 Summarize end-to-end: target + mode, candidate count, the four CLASSIFY buckets, the top true
 positives (claim / severity / location), and the coverage caveats (deferred / unverified /
 excluded). Give paths to `report.md`, `report_true_positives.md`, and (if run) `architecture.md`.
-If coverage caveats are non-trivial, recommend `--with-followup` / `--with-hypo-loop`.
+If coverage caveats are non-trivial, recommend simply re-running `/vr-analyze` (same target): the
+followup and hypothesis loops are already ON by default and auto-extend by `--rounds` each resume,
+so another run advances coverage; use `--rounds N` for a larger jump.
 
 ## Notes
 
