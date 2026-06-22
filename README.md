@@ -51,7 +51,7 @@ git clone <this-repo> && cd kernel_vr_skills
 ./setup.sh
 
 # 1. Point it at a target once (cached to configs/vr-config.json afterward):
-/vr-analyze --repo /path/to/linux-kernel --scope drivers/gpu/arm/midgard
+/vr-analyze --repo <kernel-source-root> --scope <subsystem-subdir>
 
 # 2. From then on, just:
 /vr-analyze
@@ -77,7 +77,12 @@ the followup loop, and the top-down hypothesis loop. Flags only *reduce* it:
 | `--no-followup` | skip the Stage 5 followup loop |
 | `--no-hypo-loop` | skip the top-down hypothesis loop |
 | `--quick` | bottom-up core only: MAP → TRIAGE → DEEP → CLASSIFY → REPORT |
-| `--rounds N` | round cap for the loops (default 2) |
+| `--fresh` | clear `out/` and start clean; **default preserves `out/` (resume)** — a target change clears regardless |
+| `--rounds N` | rounds to *advance* per invocation (default 2). On a same-target resume the cap auto-extends by N each run, so a bare re-run is never a no-op at the cap |
+
+By default a re-run **resumes**: existing non-empty handoffs are reused and the followup / hypothesis
+loops pick up where they left off, advancing `--rounds` more rounds each time. Use `--fresh` to discard
+prior results and start over.
 
 > `/vr-analyze` is one **skill invocation**, not a shell one-liner: the deterministic scripts run
 > via Bash, but the analysis stages spawn subagents, which only Claude can do.
@@ -87,9 +92,9 @@ the followup loop, and the top-down hypothesis loop. Flags only *reduce* it:
 ## How it works
 
 ```
-                 ┌─ (A) bottom-up: find by pattern ─┐
-target source →  │                                  │ → findings.json → classified.json → report
-                 └─ (B) top-down: find by understanding ┘
+                   ┌─ (A) bottom-up: find by pattern ───────┐
+  target source  ─►┤                                        ├─►  findings.json → classified.json → report
+                   └─ (B) top-down: find by understanding ──┘
 ```
 
 ### (A) Bottom-up pipeline
@@ -111,7 +116,11 @@ target source →  │                                  │ → findings.json �
   selects what advances to DEEP. DoS-looking bugs are *escalated*, never dropped.
 - **DEEP**: per-candidate data-flow / reachability / **true-impact** analysis, then **adversarial
   verification** — 3 independent refuters per finding; a refutation only counts if it cites
-  concrete evidence. A vote decides confirmed / refuted / uncertain / unverified.
+  concrete evidence. A vote decides confirmed / refuted / uncertain / unverified. Refuters obey
+  hard anti-false-negative rules: a re-check that skips a required update is **not** a guard, a
+  lock only refutes if it covers the exact corrupted object/timepoint, the finding's *area* isn't
+  cleared just because its *stated mechanism* is wrong, and safety-claiming comments aren't trusted.
+  Race / TOCTOU / check-then-act findings require the full 3-lens panel (no single-verdict kill).
 - **CLASSIFY**: conservative TP/FP/uncertain call, then the single authoritative scope/impact
   enforcement (e.g. DoS exclusion if the human opted in). Buckets: TP / uncertain / out_of_scope / FP.
 - **FOLLOWUP** (optional, iterative): chases `followup_symbols` from open findings across function
@@ -144,6 +153,9 @@ Per round:
 
 Guardrail: only `concrete` hypotheses can be refuted; refuting an `area`/`mechanism` is downgraded
 to "open" — you cannot prove an area safe, so broad directions stay alive (no tunnel vision).
+And refuting a `concrete` hypothesis disproves only its *stated mechanism*, not the safety of the
+code it touched: `vr_hypo_merge.py` re-queues that function for one more look (one-shot, gated to
+failure-prone classes like race/uaf/double_free) so a real bug next to a wrong guess isn't cleared.
 
 Termination: model deltas dry up for K rounds **and** no open concrete hypotheses remain, or the
 round/budget cap is hit.
@@ -179,12 +191,3 @@ queries/call_graph.scm         # tree-sitter call-graph query
 setup.sh                       # one-time setup (tree-sitter + C grammar, self-check)
 out/                           # all run artifacts (gitignored)
 ```
-
----
-
-## Status
-
-- All 10 deterministic scripts are implemented and smoke-tested. `vr_map.py` is validated against a
-  real kernel tree (Mali r54p3, `drivers/gpu/arm/midgard`).
-- The LLM-driven stages are specified (skills + schemas) and the handoffs are wired; a full
-  end-to-end run with live subagents is the next validation step.
